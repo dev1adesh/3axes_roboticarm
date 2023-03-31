@@ -1,0 +1,83 @@
+#include <iostream>
+#include <cstdlib>
+#include <cmath>
+
+const int xMotorPin = 3;
+const int yMotorPin = 5;
+const int zMotorPin = 6;
+const int gripperMotorPin = 9;
+
+// Defining the limits of the motors
+const int xMin = 0;
+const int xMax = 100;
+const int yMin = 0;
+const int yMax = 100;
+const int zMin = 0;
+const int zMax = 100;
+const int gripperMin = 0;
+const int gripperMax = 180;
+
+void moveMotor(int pin, int angle);
+void moveArmToPosition(int x, int y, int z);
+void openGripper();
+void closeGripper();
+
+int main()
+{
+    // Set the motor pins as output
+    pinMode(xMotorPin, OUTPUT);
+    pinMode(yMotorPin, OUTPUT);
+    pinMode(zMotorPin, OUTPUT);
+    pinMode(gripperMotorPin, OUTPUT);
+
+    // Move the gripper to (0, 0, 0)
+    moveArmToPosition(0, 0, 0);
+
+    // Getting input commands from the user
+    int x, y, z, gripper;
+    while (true) {
+        std::cout << "Enter x, y, z, and gripper positions (separated by spaces): ";
+        std::cin >> x >> y >> z >> gripper;
+
+        // Check that the input is within the limits
+        if (x < xMin || x > xMax || y < yMin || y > yMax || z < zMin || z > zMax ||
+            gripper < gripperMin || gripper > gripperMax) {
+            std::cout << "Invalid input! Please enter values within the limits.\n";
+            continue;
+        }
+
+        // Move the motors to the desired positions
+        moveArmToPosition(x, y, z);
+        moveMotor(gripperMotorPin, gripper);
+    }
+
+    return 0;
+}
+
+void moveMotor(int pin, int angle) {
+  myservo.attach(pin);
+  myservo.write(angle);
+  delay(15);
+}
+
+void moveArmToPosition(int x, int y, int z) {
+  // Calculate the angles of the joints based on the desired position
+  int xAngle = calculateXAngle(x);
+  int yAngle = calculateYAngle(y);
+  int zAngle = calculateZAngle(z);
+
+  // Send the appropriate signals to the motors to move the arm to the desired position
+  moveMotor(xMotorPin, xAngle);
+  moveMotor(yMotorPin, yAngle);
+  moveMotor(zMotorPin, zAngle);
+}
+
+void openGripper() {
+  // Send a signal to the gripper motor to open the gripper
+  moveMotor(gripperMotorPin, gripperMax);
+}
+
+void closeGripper() {
+  // Send a signal to the gripper motor to close the gripper
+  moveMotor(gripperMotorPin, gripperMin);
+}
